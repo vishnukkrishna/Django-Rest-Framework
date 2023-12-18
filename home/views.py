@@ -50,7 +50,7 @@ def index(request):
     return Response(json_response)
   
 
-@api_view(['GET', 'POST', 'PUT', 'PATCH'])
+@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def people(request):
   if request.method == 'GET':
     obj = Person.objects.all()
@@ -77,9 +77,16 @@ def people(request):
   
   elif request.method == 'PATCH':
     data = request.data
-    serializer = PeopleSerializer(data = data, partial = True)
+    obj = Person.objects.get(id = data['id'])
+    serializer = PeopleSerializer(obj, data = data, partial = True)
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data)
   
     return Response(serializer.errors)
+  
+  else:
+    data = request.data
+    obj = Person.objects.get(id = data['id'])
+    obj.delete()
+    return Response({'message': 'person deleted'})
