@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Person
-from .serializers import PeopleSerializer
+from .serializers import PeopleSerializer, LoginSerializer
 
 # Create your views here.
 
@@ -50,10 +50,24 @@ def index(request):
     return Response(json_response)
   
 
+
+@api_view(['POST'])
+def login(request):
+  data = request.data
+  serializer = LoginSerializer(data = data)
+
+  if serializer.is_valid():
+    data = serializer.validated_data
+    print(data)
+    return Response({'message': 'Login successful'})
+  
+  return Response(serializer.errors)
+
+
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def people(request):
   if request.method == 'GET':
-    obj = Person.objects.all()
+    obj = Person.objects.filter(color__isnull=False)
     serializer = PeopleSerializer(obj, many = True)
     return Response(serializer.data)
   
