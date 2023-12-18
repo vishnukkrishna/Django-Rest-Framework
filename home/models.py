@@ -9,8 +9,9 @@ class Color(models.Model):
     return self.color_name
 
 class Person(models.Model):
-  name = models.CharField(max_length=100)
-  age  = models.IntegerField()
+  color = models.ForeignKey(Color, on_delete=models.CASCADE, related_name="color")
+  name  = models.CharField(max_length=100)
+  age   = models.IntegerField()
 
   def __str__(self):
     return self.name
