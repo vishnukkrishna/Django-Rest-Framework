@@ -5,6 +5,8 @@ from rest_framework.decorators import api_view
 from .models import Person
 from .serializers import PeopleSerializer, LoginSerializer
 from rest_framework.views import APIView
+from rest_framework import viewsets
+from rest_framework.viewsets import ModelViewSet
 
 # Create your views here.
 
@@ -65,7 +67,7 @@ def login(request):
   return Response(serializer.errors)
 
 
-
+# APIView methods
 class PersonAPI(APIView):
 
   # GET request
@@ -113,6 +115,7 @@ class PersonAPI(APIView):
     return Response({'message': 'person deleted'})
 
 
+# Normal api_view
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def people(request):
 
@@ -158,3 +161,11 @@ def people(request):
     obj = Person.objects.get(id = data['id'])
     obj.delete()
     return Response({'message': 'person deleted'})
+  
+
+
+# ModelViewSet
+class PeopleViewSet(viewsets.ModelViewSet):
+
+  serializer_class = PeopleSerializer
+  queryset = Person.objects.all()
