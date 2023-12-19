@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Person
 from .serializers import PeopleSerializer, LoginSerializer
+from rest_framework.views import APIView
 
 # Create your views here.
 
@@ -64,13 +65,61 @@ def login(request):
   return Response(serializer.errors)
 
 
+
+class PersonAPI(APIView):
+
+  # GET request
+  def get(self, request):
+    obj = Person.objects.filter(color__isnull = False)
+    serializer = PeopleSerializer(obj, many=True)
+    return Response(serializer.data)
+  
+  # POST request
+  def post(self, request):
+    data = request.data
+    serializer = PeopleSerializer(data = data)
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data)
+    
+    return Response(serializer.errors)
+  
+  # PUT request
+  def put(self, request):
+    data = request.data
+    serializer = PeopleSerializer(data = data)
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data)
+    
+    return Response(serializer.errors)
+
+  # PATCH request
+  def patch(self, request):
+    data = request.data
+    obj = Person.objects.get(id = data['id'])
+    serializer = PeopleSerializer(obj, data = data, partial = True)
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data)
+    
+    return Response(serializer.errors)
+
+  def delete(self, request):
+    return Response({'message' : 'This is a delete request'})
+  
+
+
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def people(request):
+
+  # GET request
   if request.method == 'GET':
     obj = Person.objects.filter(color__isnull=False)
     serializer = PeopleSerializer(obj, many = True)
     return Response(serializer.data)
   
+  # POST request
   elif request.method == 'POST':
     data = request.data
     serializer = PeopleSerializer(data = data)
@@ -80,6 +129,7 @@ def people(request):
     
     return Response(serializer.errors)
   
+  # PUT request
   elif request.method == 'PUT':
     data = request.data
     serializer = PeopleSerializer(data = data)
@@ -89,6 +139,7 @@ def people(request):
     
     return Response(serializer.errors)
   
+  # PATCH request
   elif request.method == 'PATCH':
     data = request.data
     obj = Person.objects.get(id = data['id'])

@@ -6,4 +6,5 @@ urlpatterns = [
   path('index/', index),
   path('people/', people),
   path('login/', login),
+  path('persons/', PersonAPI.as_view()),
 ]
