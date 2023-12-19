@@ -105,9 +105,12 @@ class PersonAPI(APIView):
     
     return Response(serializer.errors)
 
+  # DELETE request
   def delete(self, request):
-    return Response({'message' : 'This is a delete request'})
-  
+    data = request.data
+    obj = Person.objects.get(id = data['id'])
+    obj.delete()
+    return Response({'message': 'person deleted'})
 
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
