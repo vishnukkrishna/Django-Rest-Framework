@@ -13,5 +13,6 @@ urlpatterns = [
   path('login/', login),
   path('persons/', PersonAPI.as_view()),
   path('register/', ResgisterAPI.as_view()),
+  path('login/', LoginAPI.as_view()),
   path('', include(router.urls))
 ]

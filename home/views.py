@@ -7,7 +7,10 @@ from .serializers import PeopleSerializer, LoginSerializer, RegistrationSerializ
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework import status
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+
+
 # Create your views here.
 
 def new(request):
@@ -190,8 +193,26 @@ class ResgisterAPI(APIView):
     serializer = RegistrationSerializer(data = data)
 
     if not serializer.is_valid():
-      # serializer.save()
       return Response({'status': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     serializer.save()
 
     return Response({'status': True, 'message': 'User Created'}, status=status.HTTP_201_CREATED)
+  
+
+
+# Login
+class LoginAPI(APIView):
+
+  def post(self, request):
+    data = request.data
+    serializer = LoginSerializer(data = data)
+
+    if not serializer.is_valid():
+      return Response({'status': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save()
+
+    user = authenticate(username = serializer.data['username'], password = serializer.data['password'])
+
+    token,_ = Token.objects.get_or_create(user = user)
+
+    return Response({'status': True, 'message': 'User Login', 'token': str(token)} , status=status.HTTP_201_CREATED)
