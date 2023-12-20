@@ -3,11 +3,11 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Person
-from .serializers import PeopleSerializer, LoginSerializer
+from .serializers import PeopleSerializer, LoginSerializer, RegistrationSerializer
 from rest_framework.views import APIView
 from rest_framework import viewsets
-from rest_framework.viewsets import ModelViewSet
-
+from rest_framework import status
+from django.contrib.auth.models import User
 # Create your views here.
 
 def new(request):
@@ -169,3 +169,29 @@ class PeopleViewSet(viewsets.ModelViewSet):
 
   serializer_class = PeopleSerializer
   queryset = Person.objects.all()
+
+  def list(self, request):
+    search = request.GET.get('search')
+    queryset = self.queryset
+    if search:
+      queryset = queryset.filter(name__startswith=search)
+
+    serializer = PeopleSerializer(queryset, many=True)
+    
+    return Response({'status': 200, 'data': serializer.data}, status=status.HTTP_200_OK)
+  
+
+
+# Resgisteration
+class ResgisterAPI(APIView):
+
+  def post(self, request):
+    data = request.data
+    serializer = RegistrationSerializer(data = data)
+
+    if not serializer.is_valid():
+      # serializer.save()
+      return Response({'status': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save()
+
+    return Response({'status': True, 'message': 'User Created'}, status=status.HTTP_201_CREATED)
