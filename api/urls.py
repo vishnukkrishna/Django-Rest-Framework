@@ -8,11 +8,11 @@ urlpatterns = router.urls
 
 
 urlpatterns = [
+  path('', include(router.urls)),
+  path('register/', ResgisterAPI.as_view()),
+  path('login/', LoginAPI.as_view()),
   path('index/', index),
   path('people/', people),
   path('login/', login),
   path('persons/', PersonAPI.as_view()),
-  path('register/', ResgisterAPI.as_view()),
-  path('login/', LoginAPI.as_view()),
-  path('', include(router.urls))
 ]

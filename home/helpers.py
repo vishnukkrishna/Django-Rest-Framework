@@ -1,0 +1,7 @@
+
+
+
+
+
+def paginator():
+  pass

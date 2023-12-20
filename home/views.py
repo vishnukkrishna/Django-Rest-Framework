@@ -9,7 +9,10 @@ from rest_framework import viewsets
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from django.core.paginator import Paginator
+from rest_framework.decorators import action
 
 # Create your views here.
 
@@ -73,11 +76,21 @@ def login(request):
 # APIView methods
 class PersonAPI(APIView):
 
+  permission_classes = [IsAuthenticated]
+  authentication_classes = [TokenAuthentication]
+
   # GET request
   def get(self, request):
-    obj = Person.objects.filter(color__isnull = False)
-    serializer = PeopleSerializer(obj, many=True)
-    return Response(serializer.data)
+    try:     
+      print(request.user)
+      obj  = Person.objects.all()
+      page = request.GET.get('page', 1)
+      page_size  = 3
+      paginator = Paginator(obj, page_size)
+      serializer = PeopleSerializer(paginator.page(page), many=True)
+      return Response(serializer.data)
+    except Exception as e:
+      return Response({'status': False, 'message':'Invalid pagination'})
   
   # POST request
   def post(self, request):
@@ -184,6 +197,10 @@ class PeopleViewSet(viewsets.ModelViewSet):
     return Response({'status': 200, 'data': serializer.data}, status=status.HTTP_200_OK)
   
 
+  @action(detail=True, methods=['POST'])
+  def send_mail_to_person(self, request):
+    return Response({'status': True, 'message':'Email send Success'}, status=status.HTTP_200_OK)
+
 
 # Resgisteration
 class ResgisterAPI(APIView):
@@ -209,9 +226,16 @@ class LoginAPI(APIView):
 
     if not serializer.is_valid():
       return Response({'status': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-    serializer.save()
+
+    print(serializer.data)
 
     user = authenticate(username = serializer.data['username'], password = serializer.data['password'])
+
+    if not user:
+      return Response({'status': False, 'message': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    print(user)
+
 
     token,_ = Token.objects.get_or_create(user = user)
 
